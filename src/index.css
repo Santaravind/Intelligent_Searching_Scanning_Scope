@@ -1,0 +1,82 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#050B14] text-slate-200 font-sans antialiased selection:bg-cyan-500 selection:text-black;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Futuristic Cyber HUD Styles */
+.cyber-panel {
+  @apply bg-[#0A1325]/90 border border-[#172D52] rounded-xl backdrop-blur-md transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.4)];
+}
+
+.cyber-panel:hover {
+  @apply border-[#24467D] shadow-[0_4px_25px_rgba(0,240,255,0.08)];
+}
+
+.cyber-panel-active {
+  @apply border-cyan-500/50 shadow-[0_0_15px_rgba(0,240,255,0.2)];
+}
+
+.cyber-glow-blue {
+  box-shadow: 0 0 15px rgba(30, 96, 213, 0.4);
+}
+
+.cyber-glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+.cyber-glow-green {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.cyber-badge {
+  @apply px-2.5 py-0.5 text-xs font-semibold rounded-full uppercase tracking-wider flex items-center gap-1.5;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060e1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #172d52;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
+
+/* Leaflet dark theme fix */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: #0b1528 !important;
+  border-radius: 0.5rem;
+}
+.leaflet-tile {
+  filter: brightness(0.85) contrast(1.15) saturate(1.1);
+}
+
+/* Print styles for Forensic Report */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
