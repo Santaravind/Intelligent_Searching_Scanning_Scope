@@ -18,8 +18,8 @@ export const ForensicProvider = ({ children }) => {
   const [investigator, setInvestigator] = useState(INITIAL_INVESTIGATOR);
   
   // ESP32-CAM Feed & Stream Config
-  const [streamUrl, setStreamUrl] = useState('http://192.168.1.105:81/stream');
-  const [cameraSource, setCameraSource] = useState('mock'); // 'mock' | 'webcam' | 'esp32'
+  const [streamUrl, setStreamUrl] = useState('http://10.97.56.183:81/stream');
+  const [cameraSource, setCameraSource] = useState('esp32'); // 'esp32' | 'mock' | 'webcam'
   const [cameraFilter, setCameraFilter] = useState('none'); // 'none' | 'night' | 'thermal' | 'edge' | 'grid'
   const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(0);

@@ -52,7 +52,7 @@ export const Header = () => {
             <p className="text-xs font-medium text-cyan-400/90 tracking-wide flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
               {/* Portable AI-Assisted Forensic Scanning */}
-              Indresh Kumar
+              Developed by Indresh Kumar
             </p>
           </div>
         </div>

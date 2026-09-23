@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Camera,
   Video,
@@ -11,7 +11,8 @@ import {
   Sun,
   Eye,
   Crosshair,
-  Volume2
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { useForensic } from '../../context/ForensicContext';
 import crimeSceneImg from '../../assets/crime_scene_feed.jpg';
@@ -20,6 +21,8 @@ export const LiveFeedView = () => {
   const {
     streamUrl,
     setStreamUrl,
+    cameraSource,
+    setCameraSource,
     cameraFilter,
     setCameraFilter,
     isRecording,
@@ -36,6 +39,9 @@ export const LiveFeedView = () => {
   const [contrast, setContrast] = useState(100);
   const [zoom, setZoom] = useState(1);
   const [showHud, setShowHud] = useState(true);
+  const [streamError, setStreamError] = useState(false);
+  const [streamKey, setStreamKey] = useState(Date.now());
+  const imgRef = useRef(null);
 
   const filterOptions = [
     { id: 'none', label: 'Standard RGB' },
@@ -50,6 +56,32 @@ export const LiveFeedView = () => {
     if (cameraFilter === 'thermal') base += ' invert(1) hue-rotate(180deg) saturate(3)';
     if (cameraFilter === 'edge') base += ' invert(0.8) grayscale(1)';
     return base;
+  };
+
+  const isLiveEsp = cameraSource === 'esp32';
+  const displaySrc = isLiveEsp && !streamError ? `${streamUrl}?t=${streamKey}` : crimeSceneImg;
+
+  const handleCapture = () => {
+    let capturedDataUrl = crimeSceneImg;
+    try {
+      if (imgRef.current && imgRef.current.naturalWidth > 0) {
+        const canvas = document.createElement('canvas');
+        canvas.width = imgRef.current.naturalWidth || 1280;
+        canvas.height = imgRef.current.naturalHeight || 720;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgRef.current, 0, 0);
+        capturedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      }
+    } catch (e) {
+      capturedDataUrl = crimeSceneImg;
+    }
+
+    captureEvidence({
+      description: `ESP32-CAM High-Res Frame Snapshot (${detectedObject.name})`,
+      type: 'Image',
+      tag: isLiveEsp ? 'Live IP Snapshot' : 'HD Frame Capture',
+      customImage: capturedDataUrl
+    });
   };
 
   return (
@@ -68,15 +100,52 @@ export const LiveFeedView = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Source Toggle */}
+          <div className="flex bg-[#070E1B] p-0.5 rounded-lg border border-[#1A3866] text-xs font-mono">
+            <button
+              onClick={() => {
+                setCameraSource('esp32');
+                setStreamError(false);
+                setStreamKey(Date.now());
+              }}
+              className={`px-3 py-1 rounded transition-all flex items-center gap-1.5 ${
+                isLiveEsp && !streamError
+                  ? 'bg-cyan-500 text-black font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Wifi className="w-3.5 h-3.5" />
+              <span>Live ESP32</span>
+            </button>
+            <button
+              onClick={() => {
+                setCameraSource('mock');
+                setStreamError(false);
+              }}
+              className={`px-3 py-1 rounded transition-all ${
+                !isLiveEsp || streamError
+                  ? 'bg-blue-600 text-white font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>Demo Feed</span>
+            </button>
+          </div>
+
           <input
             type="text"
             value={streamUrl}
             onChange={(e) => setStreamUrl(e.target.value)}
-            placeholder="http://192.168.1.105:81/stream"
+            placeholder="http://10.97.56.183:81/stream"
             className="bg-[#070E1B] border border-[#1A3866] text-cyan-300 px-3 py-1.5 rounded-lg text-xs font-mono w-60 focus:border-cyan-400 focus:outline-none"
           />
           <button
-            onClick={() => addLog(`ESP32-CAM stream reconnected to: ${streamUrl}`, 'success')}
+            onClick={() => {
+              setStreamError(false);
+              setStreamKey(Date.now());
+              setCameraSource('esp32');
+              addLog(`ESP32-CAM stream reconnected to: ${streamUrl}`, 'success');
+            }}
             className="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white"
             title="Reconnect Stream"
           >
@@ -98,21 +167,56 @@ export const LiveFeedView = () => {
               style={{ transform: `scale(${zoom})` }}
             >
               <img
-                src={crimeSceneImg}
+                ref={imgRef}
+                src={displaySrc}
                 alt="Live Camera Feed"
+                crossOrigin="anonymous"
+                onError={() => {
+                  if (isLiveEsp) setStreamError(true);
+                }}
                 style={{ filter: getFilterStyle() }}
                 className="w-full h-full object-cover"
               />
             </div>
 
+            {/* Offline notification if stream fails */}
+            {isLiveEsp && streamError && (
+              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-6 text-center">
+                <WifiOff className="w-10 h-10 text-amber-400 mb-2" />
+                <h3 className="text-sm font-bold text-white mb-1">
+                  ESP32 Live Stream Not Connected
+                </h3>
+                <p className="text-xs font-mono text-cyan-300 mb-3 bg-[#070E1B] px-3 py-1 rounded border border-[#1A3866]">
+                  Target: {streamUrl}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setStreamError(false);
+                      setStreamKey(Date.now());
+                    }}
+                    className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs rounded"
+                  >
+                    Retry IP Connection
+                  </button>
+                  <button
+                    onClick={() => setCameraSource('mock')}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded border border-slate-600"
+                  >
+                    Switch to Demo Stream
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Futuristic HUD Overlay */}
-            {showHud && (
+            {showHud && !streamError && (
               <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
                 {/* Top HUD Row */}
                 <div className="flex justify-between items-center">
                   <div className="bg-black/70 px-2.5 py-1 rounded border border-cyan-500/30 text-[11px] font-mono text-cyan-300 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>ESP32-CAM LIVE [1080p @ 30FPS]</span>
+                    <span>{isLiveEsp ? 'ESP32 REAL-TIME STREAM' : 'DEMO LAB FEED'} [30 FPS]</span>
                   </div>
 
                   <div className="bg-black/70 px-2.5 py-1 rounded border border-cyan-500/30 text-[11px] font-mono text-cyan-300">
@@ -132,15 +236,15 @@ export const LiveFeedView = () => {
                 <div className="absolute top-[28%] left-[28%] w-[44%] h-[46%] border-2 border-cyan-400 bg-cyan-400/10 pointer-events-none">
                   <div className="absolute -top-7 left-0 bg-cyan-500 text-black px-2 py-0.5 text-xs font-bold rounded flex items-center gap-1.5 shadow">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>{detectedObject.name} ({detectedObject.confidence}%)</span>
+                    <span>{detectedObject.name} ({detectedObject.confidence}% AI)</span>
                   </div>
                 </div>
 
                 {/* Bottom HUD Row */}
                 <div className="flex justify-between items-center text-[10px] font-mono text-slate-300 bg-black/60 px-2 py-1 rounded">
-                  <span>ISO: AUTO (100)</span>
-                  <span>SHUTTER: 1/120s</span>
-                  <span>AI MODEL: YOLOv8-NANO</span>
+                  <span>STREAM: {streamUrl.replace('http://', '')}</span>
+                  <span>MODE: MJPEG REAL-TIME</span>
+                  <span>AI: YOLOv8</span>
                 </div>
               </div>
             )}
@@ -150,14 +254,8 @@ export const LiveFeedView = () => {
           <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[#162A4E]">
             <div className="flex items-center gap-2">
               <button
-                onClick={() =>
-                  captureEvidence({
-                    description: `ESP32-CAM High-Res Frame Snapshot`,
-                    type: 'Image',
-                    tag: 'High-Res Frame'
-                  })
-                }
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(30,96,213,0.4)]"
+                onClick={handleCapture}
+                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(30,96,213,0.4)] active:scale-95"
               >
                 <Camera className="w-4 h-4" />
                 <span>Capture High-Res</span>

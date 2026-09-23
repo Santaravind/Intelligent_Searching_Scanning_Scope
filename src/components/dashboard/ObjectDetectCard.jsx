@@ -23,20 +23,20 @@ export const ObjectDetectCard = () => {
       </div>
 
       {/* Main Identification Preview */}
-      <div className="flex items-center gap-3 my-auto py-2">
+        <div className="flex items-center gap-3 my-auto py-2">
         {/* Cropped thumbnail with bounding box graphic */}
-        <div className="relative w-20 h-16 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0 bg-black shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-          <img
+         <div className="relative w-20 h-16 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0 bg-black shadow-[0_0_10px_rgba(0,240,255,0.2)]"> 
+           {/* <img
             src={crimeSceneImg}
             alt="Identified Subject"
             className="w-full h-full object-cover object-center scale-125"
-          />
-          {/* Cyber tag overlay */}
+          />  */}
+          {/* {/* Cyber tag overlay  */}
           <div className="absolute inset-0 border border-cyan-400/80 pointer-events-none"></div>
           <div className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] text-cyan-300 font-mono text-center py-0.5 font-bold">
-            OBJ_ROI_01
+           
           </div>
-        </div>
+        </div>  
 
         {/* Object Label & Class */}
         <div className="flex-1 min-w-0">
