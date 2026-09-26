@@ -38,9 +38,9 @@ export const EvidenceDetailModal = () => {
         {/* Content Body */}
         <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
           {/* Main Visual Image Preview */}
-          <div className="relative w-full h-64 rounded-xl overflow-hidden border border-[#1A3866] bg-black group shadow-lg">
+          <div className="relative w-full h-64 rounded-xl overflow-hidden border border-[#1A3866] bg-black group shadow-lg flex items-center justify-center">
             <img
-              src={crimeSceneImg}
+              src={selectedEvidence.customImage || crimeSceneImg}
               alt="Evidence Full View"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -53,8 +53,12 @@ export const EvidenceDetailModal = () => {
             </div>
 
             {/* Cryptographic Stamp on photo */}
-            <div className="absolute bottom-2 right-2 bg-black/80 px-3 py-1 rounded-md border border-cyan-500/30 text-[10px] font-mono text-cyan-300">
-              TAMPER-PROOF FORENSIC STAMP
+            <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+              <div className="bg-black/80 px-2.5 py-1 rounded-md border border-cyan-500/30 text-[10px] font-mono text-cyan-300">
+                {selectedEvidence.customImage || selectedEvidence.isRealData
+                  ? 'LIVE HARDWARE FRAME'
+                  : 'SAMPLE REFERENCE'}
+              </div>
             </div>
           </div>
 

@@ -4,7 +4,11 @@ import { useForensic } from '../../context/ForensicContext';
 import crimeSceneImg from '../../assets/crime_scene_feed.jpg';
 
 export const ObjectDetectCard = () => {
-  const { detectedObject } = useForensic();
+  const { detectedObject, lastCapturedImage } = useForensic();
+
+  const objectName = (detectedObject.name && detectedObject.name.trim()) || "Target Object";
+  const objectCategory = (detectedObject.category && detectedObject.category.trim()) || "Awaiting Scan";
+  const thumbnailSrc = lastCapturedImage || crimeSceneImg;
 
   return (
     <div className="cyber-panel p-3.5 flex flex-col justify-between h-full relative overflow-hidden select-none">
@@ -23,28 +27,30 @@ export const ObjectDetectCard = () => {
       </div>
 
       {/* Main Identification Preview */}
-        <div className="flex items-center gap-3 my-auto py-2">
+      <div className="flex items-center gap-3 my-auto py-2">
         {/* Cropped thumbnail with bounding box graphic */}
-         <div className="relative w-20 h-16 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0 bg-black shadow-[0_0_10px_rgba(0,240,255,0.2)]"> 
-           {/* <img
-            src={crimeSceneImg}
+        <div className="relative w-20 h-16 rounded-lg overflow-hidden border border-cyan-500/50 shrink-0 bg-black shadow-[0_0_10px_rgba(0,240,255,0.2)]"> 
+          <img
+            src={thumbnailSrc}
             alt="Identified Subject"
-            className="w-full h-full object-cover object-center scale-125"
-          />  */}
-          {/* {/* Cyber tag overlay  */}
+            className="w-full h-full object-cover object-center"
+          /> 
+          {/* Cyber tag overlay  */}
           <div className="absolute inset-0 border border-cyan-400/80 pointer-events-none"></div>
-          <div className="absolute bottom-0 inset-x-0 bg-black/80 text-[8px] text-cyan-300 font-mono text-center py-0.5 font-bold">
-           
-          </div>
+          {lastCapturedImage && (
+            <div className="absolute bottom-0 inset-x-0 bg-black/80 text-[7px] text-cyan-300 font-mono text-center py-0.5 font-bold">
+              LIVE FRAME
+            </div>
+          )}
         </div>  
 
         {/* Object Label & Class */}
         <div className="flex-1 min-w-0">
           <div className="text-sm font-black text-white truncate drop-shadow-sm">
-            {detectedObject.name}
+            {objectName}
           </div>
           <div className="text-[11px] font-medium text-cyan-400 truncate">
-            {detectedObject.category}
+            {objectCategory}
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useForensic } from '../../context/ForensicContext';
 import crimeSceneImg from '../../assets/crime_scene_feed.jpg';
 
 export const EvidencePreviewCard = () => {
-  const { evidenceList, setSelectedEvidence } = useForensic();
+  const { evidenceList, setSelectedEvidence, lastCapturedImage, lastCapturedData } = useForensic();
   const primaryEvidence = evidenceList[0] || {
     id: 'EV-001',
     object: 'Book / Bag (Nearby)',
@@ -13,6 +13,8 @@ export const EvidencePreviewCard = () => {
     time: '21:45:32',
     category: 'Education Material'
   };
+
+  const previewImage = primaryEvidence.customImage || lastCapturedImage || crimeSceneImg;
 
   return (
     <div className="cyber-panel p-4 flex flex-col justify-between h-full relative overflow-hidden select-none">
@@ -31,15 +33,20 @@ export const EvidencePreviewCard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center my-auto py-2">
         {/* Evidence Thumbnail */}
-        <div className="sm:col-span-5 relative h-20 rounded-lg overflow-hidden border border-[#1C3660] bg-black shadow-[0_0_10px_rgba(0,0,0,0.5)] group">
+        <div className="sm:col-span-5 relative h-20 rounded-lg overflow-hidden border border-[#1C3660] bg-black shadow-[0_0_10px_rgba(0,0,0,0.5)] group flex items-center justify-center">
           <img
-            src={crimeSceneImg}
+            src={previewImage}
             alt="Evidence Snapshot"
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-1 left-1 bg-black/70 text-cyan-300 font-mono text-[9px] px-1 rounded border border-cyan-500/30">
             {primaryEvidence.id}
           </div>
+          {(primaryEvidence.customImage || primaryEvidence.isRealData) && (
+            <div className="absolute bottom-1 right-1 bg-emerald-950/80 text-emerald-300 font-mono text-[8px] px-1 rounded border border-emerald-500/40">
+              LIVE
+            </div>
+          )}
         </div>
 
         {/* Evidence Metadata */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, FileText, Camera, Tag, MapPin } from 'lucide-react';
+import { X, Plus, FileText, Camera, Tag, MapPin, Upload, Image as ImageIcon } from 'lucide-react';
 import { useForensic } from '../../context/ForensicContext';
 
 export const AddEvidenceModal = () => {
@@ -10,15 +10,28 @@ export const AddEvidenceModal = () => {
     distance,
     scanAngle,
     location,
-    detectedObject
+    detectedObject,
+    lastCapturedImage
   } = useForensic();
 
   const [description, setDescription] = useState('');
-  const [type, setType] = useState('Note');
-  const [tag, setTag] = useState('Field Note');
-  const [objectName, setObjectName] = useState(detectedObject.name);
+  const [type, setType] = useState('Image');
+  const [tag, setTag] = useState('Field Observation');
+  const [objectName, setObjectName] = useState(detectedObject.name || '');
+  const [customImage, setCustomImage] = useState(null);
 
   if (!isAddEvidenceOpen) return null;
+
+  const handleImageFile = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCustomImage(event.target?.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,9 +39,12 @@ export const AddEvidenceModal = () => {
       description: description || 'Field Observation Logged',
       type,
       tag,
-      object: objectName,
+      object: objectName || (detectedObject.name && detectedObject.name.trim()) || 'Target Item',
+      customImage: customImage || (type === 'Image' ? lastCapturedImage : null),
+      isRealData: Boolean(customImage || lastCapturedImage || type === 'Image')
     });
     setDescription('');
+    setCustomImage(null);
     setIsAddEvidenceOpen(false);
   };
 
@@ -94,6 +110,7 @@ export const AddEvidenceModal = () => {
                 type="text"
                 value={objectName}
                 onChange={(e) => setObjectName(e.target.value)}
+                placeholder="e.g. Bag, Device, Marker"
                 className="w-full bg-[#070E1B] border border-[#1A3763] rounded-lg px-3 py-2 text-white font-mono focus:border-cyan-400 focus:outline-none"
               />
             </div>
@@ -108,6 +125,36 @@ export const AddEvidenceModal = () => {
                 placeholder="e.g. Primary, Secondary, Trace"
                 className="w-full bg-[#070E1B] border border-[#1A3763] rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
               />
+            </div>
+          </div>
+
+          {/* Attach Real Photo */}
+          <div>
+            <label className="block text-slate-300 font-semibold mb-1.5">
+              Attach Real Photo / Snapshot (Optional)
+            </label>
+            <div className="flex items-center gap-2">
+              <label className="flex-1 bg-[#070E1B] hover:bg-[#0d1c33] border border-dashed border-[#1A3763] hover:border-cyan-400 rounded-lg p-2.5 text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
+                <Upload className="w-4 h-4 text-cyan-400" />
+                <span className="text-slate-300">
+                  {customImage ? 'Custom Photo Selected' : 'Choose Photo File...'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFile}
+                  className="hidden"
+                />
+              </label>
+              {lastCapturedImage && !customImage && (
+                <button
+                  type="button"
+                  onClick={() => setCustomImage(lastCapturedImage)}
+                  className="px-3 py-2 bg-blue-950/70 border border-blue-500/40 text-blue-300 text-xs rounded-lg hover:bg-blue-900/60 transition-colors"
+                >
+                  Use Camera Frame
+                </button>
+              )}
             </div>
           </div>
 

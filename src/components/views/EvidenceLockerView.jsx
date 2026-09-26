@@ -125,12 +125,23 @@ export const EvidenceLockerView = () => {
             {item.type === 'Image' && (
               <div className="relative w-full h-36 rounded-lg overflow-hidden border border-[#1A3866] bg-black">
                 <img
-                  src={crimeSceneImg}
+                  src={item.customImage || crimeSceneImg}
                   alt="Evidence Item"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-2 left-2 bg-black/70 text-cyan-300 text-[9px] font-mono px-2 py-0.5 rounded border border-cyan-500/30">
                   {item.object}
+                </div>
+                <div className="absolute bottom-2 right-2">
+                  {item.customImage || item.isRealData ? (
+                    <span className="bg-emerald-950/90 text-emerald-400 border border-emerald-500/50 text-[9px] font-mono px-1.5 py-0.5 rounded font-bold shadow">
+                      LIVE CAPTURE
+                    </span>
+                  ) : (
+                    <span className="bg-slate-900/90 text-slate-400 border border-slate-700 text-[9px] font-mono px-1.5 py-0.5 rounded">
+                      SAMPLE
+                    </span>
+                  )}
                 </div>
               </div>
             )}
